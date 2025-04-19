@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,17 +10,41 @@ export default function EventPhotoUploader() {
   const [uploadLink, setUploadLink] = useState("");
   const [files, setFiles] = useState([]);
   const [uploaded, setUploaded] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleFileChange = (e) => {
     setFiles([...e.target.files]);
+    setUploaded(false);
+    setError("");
   };
 
   const handleUpload = async () => {
-    // Simulate upload to server (You can connect this to Firebase or another backend)
-    setUploaded(true);
+    if (files.length === 0) {
+      setError("Please select files to upload.");
+      return;
+    }
+
+    setUploading(true);
+    setError("");
+    try {
+      // Simulate successful upload without actual API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setUploaded(true);
+    } catch (error) {
+      setError("Simulated file upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleGenerateLink = () => {
+    if (!eventName.trim()) {
+      setError("Event name cannot be empty.");
+      return;
+    }
+
+    setError("");
     const link = `${window.location.origin}/event/${encodeURIComponent(eventName)}`;
     setUploadLink(link);
   };
@@ -45,6 +68,7 @@ export default function EventPhotoUploader() {
               <p className="text-blue-600 underline break-all">{uploadLink}</p>
             </div>
           )}
+          {error && <p className="text-red-600">{error}</p>}
         </CardContent>
       </Card>
 
@@ -52,10 +76,17 @@ export default function EventPhotoUploader() {
         <CardContent className="space-y-4">
           <h2 className="text-xl font-bold">Guest Photo Upload</h2>
           <Input type="file" multiple onChange={handleFileChange} />
-          <Button onClick={handleUpload} className="flex items-center gap-2">
-            <Upload className="w-4 h-4" /> Upload
+          <Button
+            onClick={handleUpload}
+            disabled={uploading}
+            className="flex items-center gap-2"
+          >
+            {uploading ? "Uploading..." : <>
+              <Upload className="w-4 h-4" /> Upload
+            </>}
           </Button>
-          {uploaded && <p className="text-green-600">Files uploaded successfully!</p>}
+          {uploaded && <p className="text-green-600">Files uploaded successfully! (Simulated)</p>}
+          {error && <p className="text-red-600">{error}</p>}
         </CardContent>
       </Card>
     </div>
